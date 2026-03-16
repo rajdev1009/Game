@@ -484,6 +484,11 @@ const MAT = {
   trainWindow: new THREE.MeshLambertMaterial({ color: 0x00ffff, emissive: 0x007777 }),
   player: new THREE.MeshLambertMaterial({ color: 0xff6600 }),
   playerAccent: new THREE.MeshLambertMaterial({ color: 0xffcc00 }),
+  playerSkin: new THREE.MeshLambertMaterial({ color: 0xf2c7a0 }),
+  playerHair: new THREE.MeshLambertMaterial({ color: 0x2f1b10 }),
+  playerShirt: new THREE.MeshLambertMaterial({ color: 0xff5c33, emissive: 0x220a02 }),
+  playerPants: new THREE.MeshLambertMaterial({ color: 0x203860 }),
+  playerShoe: new THREE.MeshLambertMaterial({ color: 0xffffff }),
   coin: new THREE.MeshLambertMaterial({ color: 0xFFE600, emissive: 0x442200 }),
   coinGlow: new THREE.MeshLambertMaterial({ color: 0xFFE600, transparent: true, opacity: 0.3 }),
   jetpackPU: new THREE.MeshLambertMaterial({ color: 0xff4400, emissive: 0x220a00 }),
@@ -505,32 +510,82 @@ scene.add(playerGroup);
 
 function buildPlayer() {
   playerGroup.clear();
-  // Body
-  const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.7, 0.3), MAT.player);
-  body.position.y = 0.85; body.castShadow = true;
-  playerGroup.add(body);
-  // Head
-  const head = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.4), MAT.player);
-  head.position.y = 1.45; head.castShadow = true;
+
+  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.23, 0.52, 6, 10), MAT.playerShirt);
+  torso.position.y = 0.95;
+  torso.castShadow = true;
+  playerGroup.add(torso);
+
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.1, 8), MAT.playerSkin);
+  neck.position.y = 1.35;
+  neck.castShadow = true;
+  playerGroup.add(neck);
+
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.23, 16, 16), MAT.playerSkin);
+  head.position.y = 1.58;
+  head.castShadow = true;
   playerGroup.add(head);
-  // Cap
-  const cap = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.12, 0.46), MAT.playerAccent);
-  cap.position.y = 1.68; playerGroup.add(cap);
-  // Legs
-  [-0.16, 0.16].forEach((x, i) => {
-    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.45, 0.22), MAT.player);
-    leg.position.set(x, 0.22, 0); leg.castShadow = true;
-    leg.name = `leg_${i}`; playerGroup.add(leg);
+
+  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.235, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), MAT.playerHair);
+  hair.position.y = 1.67;
+  hair.castShadow = true;
+  playerGroup.add(hair);
+
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.22, 0.12, 18), MAT.playerAccent);
+  cap.position.y = 1.76;
+  cap.castShadow = true;
+  playerGroup.add(cap);
+
+  const backpack = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.45, 0.16), MAT.playerAccent);
+  backpack.position.set(0, 0.95, 0.28);
+  backpack.castShadow = true;
+  playerGroup.add(backpack);
+
+  [-0.12, 0.12].forEach((x, i) => {
+    const leg = new THREE.Group();
+    leg.name = `leg_${i}`;
+    leg.position.set(x, 0.62, 0);
+
+    const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.1, 0.32, 10), MAT.playerPants);
+    thigh.position.y = -0.16;
+    thigh.castShadow = true;
+    leg.add(thigh);
+
+    const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.08, 0.32, 10), MAT.playerPants);
+    shin.position.y = -0.46;
+    shin.castShadow = true;
+    leg.add(shin);
+
+    const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.08, 0.24), MAT.playerShoe);
+    shoe.position.set(0, -0.66, 0.06);
+    shoe.castShadow = true;
+    leg.add(shoe);
+
+    playerGroup.add(leg);
   });
-  // Arms
-  [-0.42, 0.42].forEach((x, i) => {
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.4, 0.18), MAT.player);
-    arm.position.set(x, 0.92, 0); arm.castShadow = true;
-    arm.name = `arm_${i}`; playerGroup.add(arm);
+
+  [-0.32, 0.32].forEach((x, i) => {
+    const arm = new THREE.Group();
+    arm.name = `arm_${i}`;
+    arm.position.set(x, 1.14, 0);
+
+    const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.26, 10), MAT.playerShirt);
+    upper.position.y = -0.13;
+    upper.castShadow = true;
+    arm.add(upper);
+
+    const fore = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.055, 0.24, 10), MAT.playerSkin);
+    fore.position.y = -0.36;
+    fore.castShadow = true;
+    arm.add(fore);
+
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 10), MAT.playerSkin);
+    hand.position.y = -0.51;
+    hand.castShadow = true;
+    arm.add(hand);
+
+    playerGroup.add(arm);
   });
-  // Bag
-  const bag = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.5, 0.18), MAT.playerAccent);
-  bag.position.set(0, 0.9, 0.22); playerGroup.add(bag);
 }
 buildPlayer();
 
